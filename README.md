@@ -180,3 +180,4 @@ Scratch links are automatically rewritten to their `/embed` URL; other links are
   `auth.getUser()` before exposing `locals.user`.
 - Login redirects are restricted to same-site relative paths to prevent open redirects.
 # tshowcase
+# showcase
