@@ -8,12 +8,18 @@ export interface Project {
 	project_type: ProjectType;
 	file_url: string | null;
 	link: string;
+	/** Storage prefix (within `game-exports`) of an uploaded Construct 3 HTML export. */
+	game_path: string | null;
 	created_by: string | null;
 	created_at: string;
 }
 
 export const THUMBNAIL_BUCKET = 'thumbnails';
 export const FILE_BUCKET = 'project-files';
+export const GAME_BUCKET = 'game-exports';
+
+/** Entry point that an uploaded Construct 3 export is served from. */
+export const GAME_INDEX_FILE = 'index.html';
 
 export const PROJECT_TYPES: { value: ProjectType; label: string }[] = [
 	{ value: 'scratch', label: 'Scratch' },
@@ -42,4 +48,27 @@ export function resolveEmbedUrl(type: ProjectType, link: string): string {
 		}
 	}
 	return link;
+}
+
+/**
+ * The URL a project should be played from.
+ *
+ * - Scratch links are rewritten to their `/embed` variant.
+ * - Construct 3 projects with an uploaded HTML export play from our own
+ *   same-origin route (so the game's relative assets, workers and service
+ *   worker all resolve correctly).
+ * - Anything else is embedded as-is.
+ */
+export function resolvePlayUrl(
+	project: Pick<Project, 'id' | 'project_type' | 'link' | 'game_path'>
+): string {
+	if (project.project_type === 'construct3' && project.game_path) {
+		return `/projects/${project.id}/play/${GAME_INDEX_FILE}`;
+	}
+	return resolveEmbedUrl(project.project_type, project.link);
+}
+
+/** Whether a Construct 3 project is hosted by the app itself. */
+export function isHostedGame(project: Pick<Project, 'project_type' | 'game_path'>): boolean {
+	return project.project_type === 'construct3' && Boolean(project.game_path);
 }

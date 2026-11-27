@@ -171,8 +171,25 @@ and `project-files` storage buckets. Apply the schema by running the files in
 | -------------------------------------- | -------------------------------------------- |
 | `0001_projects.sql`                    | Table, grants, RLS, storage buckets/policies |
 | `0002_project_ownership.sql`           | Owner-only update/delete policies            |
+| `0003_game_exports.sql`                | Construct 3 export bucket + `game_path` column |
 
-Scratch links are automatically rewritten to their `/embed` URL; other links are embedded as-is.
+Scratch links are automatically rewritten to their `/embed` URL.
+
+### Running Construct 3 games
+
+Construct 3 projects can be played two ways:
+
+- **Hosted elsewhere** — paste the URL of an already-published game; it is embedded as-is.
+- **Uploaded export** — on the new/edit form, upload a `.zip` of the game's **Web (HTML5)** export.
+  In Construct 3 use **Menu → Export → Web (HTML5)**, then zip the *contents* of the exported
+  folder (so `index.html` sits at the top level) and upload it. The server extracts the archive
+  (with [`fflate`](https://github.com/101arrowz/fflate)), stores the files in the public
+  `game-exports` storage bucket and serves them same-origin from `/projects/<id>/play/`.
+  Because the game runs on a single origin, its relative assets, web workers and service worker all
+  resolve correctly and it plays in the embedded player.
+
+When an export is uploaded, the project's **link is optional** — it's only used for the
+"Open original" button.
 
 ## Notes
 

@@ -38,9 +38,9 @@
 		<a class="btn" href="/projects/new">Create a project</a>
 	</div>
 {:else}
-	<ul class="manage-list">
-		{#each data.projects as project (project.id)}
-			<li class="card manage-row">
+	<ul class="manage-list stagger">
+		{#each data.projects as project, i (project.id)}
+			<li class="card manage-row" style="--i: {i}">
 				<a class="thumb" href={`/projects/${project.id}`}>
 					{#if project.thumbnail_url}
 						<img src={project.thumbnail_url} alt="" loading="lazy" />
@@ -92,20 +92,24 @@
 		display: flex;
 		align-items: center;
 		gap: 1rem;
-		padding: 0.75rem;
-		transition: border-color 0.15s ease, box-shadow 0.15s ease;
+		padding: 0.85rem;
+		transition:
+			border-color 0.18s ease,
+			box-shadow 0.18s ease,
+			transform 0.18s ease;
 	}
 
 	.manage-row:hover {
 		border-color: var(--border-strong);
 		box-shadow: var(--shadow-md);
+		transform: translateY(-2px);
 	}
 
 	.thumb {
 		flex-shrink: 0;
-		width: 104px;
+		width: 112px;
 		aspect-ratio: 16 / 9;
-		border-radius: var(--radius-sm);
+		border-radius: var(--radius);
 		overflow: hidden;
 		display: grid;
 		place-items: center;

@@ -4,7 +4,9 @@ import { FILE_BUCKET, THUMBNAIL_BUCKET } from '#lib/projects.js';
 import {
 	MAX_FILE_BYTES,
 	MAX_THUMBNAIL_BYTES,
+	deleteGameExport,
 	readProjectForm,
+	uploadGameExport,
 	uploadToBucket,
 	validateProjectValues
 } from '#lib/server/projects.js';
@@ -29,13 +31,24 @@ export const actions: Actions = {
 			return fail(401, { ...values, error: 'You must be signed in to add a project.' });
 		}
 
-		const validationError = validateProjectValues(values);
+		const gameExport = formData.get('game_export');
+		const hasGameExport = gameExport instanceof File && gameExport.size > 0;
+
+		const validationError = validateProjectValues(values, { hasGameExport });
 		if (validationError) {
 			return fail(400, { ...values, error: validationError });
 		}
 
+		if (hasGameExport && values.project_type !== 'construct3') {
+			return fail(400, {
+				...values,
+				error: 'Game exports are only supported for Construct 3 projects.'
+			});
+		}
+
 		let thumbnailUrl: string | null = null;
 		let fileUrl: string | null = null;
+		let gamePath: string | null = null;
 
 		const thumbnail = formData.get('thumbnail');
 		if (thumbnail instanceof File && thumbnail.size > 0) {
@@ -64,6 +77,14 @@ export const actions: Actions = {
 			}
 		}
 
+		if (hasGameExport) {
+			try {
+				({ game_path: gamePath } = await uploadGameExport(supabase, gameExport as File, user.id));
+			} catch (e) {
+				return fail(400, { ...values, error: `Game export upload failed: ${(e as Error).message}` });
+			}
+		}
+
 		const { data, error } = await supabase
 			.from('projects')
 			.insert({
@@ -73,12 +94,15 @@ export const actions: Actions = {
 				link: values.link,
 				thumbnail_url: thumbnailUrl,
 				file_url: fileUrl,
+				game_path: gamePath,
 				created_by: user.id
 			})
 			.select('id')
 			.single();
 
 		if (error) {
+			// Don't leave a hosted export behind if the insert fails.
+			await deleteGameExport(supabase, gamePath);
 			return fail(400, { ...values, error: error.message });
 		}
 

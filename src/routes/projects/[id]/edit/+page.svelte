@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { untrack } from 'svelte';
 	import type { PageProps } from './$types';
 	import { PROJECT_TYPES, projectTypeLabel } from '#lib/projects.js';
 
@@ -7,6 +8,7 @@
 
 	const project = $derived(data.project);
 	let submitting = $state(false);
+	let projectType = $state(untrack(() => form?.project_type ?? project.project_type));
 
 	function confirmDelete(event: SubmitEvent) {
 		if (!confirm('Delete this project? This cannot be undone.')) {
@@ -60,12 +62,7 @@
 
 		<div class="field">
 			<label for="project_type">Project type</label>
-			<select
-				id="project_type"
-				name="project_type"
-				required
-				value={form?.project_type ?? project.project_type}
-			>
+			<select id="project_type" name="project_type" required bind:value={projectType}>
 				{#each PROJECT_TYPES as type}
 					<option value={type.value}>{type.label}</option>
 				{/each}
@@ -74,8 +71,49 @@
 
 		<div class="field">
 			<label for="link">Project link</label>
-			<input id="link" name="link" type="url" required value={form?.link ?? project.link} />
+			<input
+				id="link"
+				name="link"
+				type="url"
+				required={projectType !== 'construct3'}
+				value={form?.link ?? project.link}
+			/>
+			<span class="hint">
+				{projectType === 'construct3'
+					? 'Optional when a game export is hosted below.'
+					: 'Where the project is played or hosted.'}
+			</span>
 		</div>
+
+		{#if projectType === 'construct3'}
+			<div class="field">
+				<label for="game_export">
+					Game export <span class="muted">— .zip, optional</span>
+				</label>
+				{#if project.game_path}
+					<div class="current">
+						<span class="badge">Hosted export</span>
+						<a
+							href={`/projects/${project.id}/play/index.html`}
+							target="_blank"
+							rel="noopener noreferrer"
+						>
+							Preview ↗
+						</a>
+						<label class="checkline">
+							<input type="checkbox" name="remove_game_export" />
+							Remove
+						</label>
+					</div>
+				{/if}
+				<input id="game_export" name="game_export" type="file" accept=".zip,application/zip" />
+				<span class="hint">
+					{project.game_path
+						? 'Upload a new .zip to replace the hosted game.'
+						: 'Zip the contents of the Construct 3 HTML5 export (with index.html at the top level) and upload it here.'}
+				</span>
+			</div>
+		{/if}
 
 		<div class="two-up">
 			<div class="field">
@@ -111,7 +149,8 @@
 
 		<div class="submit-row">
 			<a class="btn btn-ghost" href={`/projects/${project.id}`}>Cancel</a>
-			<button class="btn" type="submit" disabled={submitting}>
+			<button class="btn" type="submit" disabled={submitting} aria-busy={submitting}>
+				{#if submitting}<span class="spinner" aria-hidden="true"></span>{/if}
 				{submitting ? 'Saving…' : 'Save changes'}
 			</button>
 		</div>
@@ -132,6 +171,10 @@
 	.form-page {
 		max-width: 620px;
 		margin: 1.75rem auto 0;
+	}
+
+	.form-page > .card {
+		box-shadow: var(--shadow-md);
 	}
 
 	.breadcrumb {

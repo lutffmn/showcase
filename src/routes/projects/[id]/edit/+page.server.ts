@@ -5,7 +5,9 @@ import {
 	MAX_FILE_BYTES,
 	MAX_THUMBNAIL_BYTES,
 	deleteFileByUrl,
+	deleteGameExport,
 	readProjectForm,
+	uploadGameExport,
 	uploadToBucket,
 	validateProjectValues
 } from '#lib/server/projects.js';
@@ -60,14 +62,9 @@ export const actions: Actions = {
 			return fail(404, { ...values, error: 'Project not found.' });
 		}
 
-		const validationError = validateProjectValues(values);
-		if (validationError) {
-			return fail(400, { ...values, error: validationError });
-		}
-
 		const { data: existing, error: fetchError } = await supabase
 			.from('projects')
-			.select('created_by, thumbnail_url, file_url')
+			.select('created_by, thumbnail_url, file_url, game_path')
 			.eq('id', params.id)
 			.maybeSingle();
 
@@ -81,8 +78,26 @@ export const actions: Actions = {
 			return fail(403, { ...values, error: 'You can only edit your own projects.' });
 		}
 
+		const gameExport = formData.get('game_export');
+		const hasGameExport = gameExport instanceof File && gameExport.size > 0;
+
+		const validationError = validateProjectValues(values, {
+			hasGameExport: hasGameExport || Boolean(existing.game_path)
+		});
+		if (validationError) {
+			return fail(400, { ...values, error: validationError });
+		}
+
+		if (hasGameExport && values.project_type !== 'construct3') {
+			return fail(400, {
+				...values,
+				error: 'Game exports are only supported for Construct 3 projects.'
+			});
+		}
+
 		let thumbnailUrl: string | null = existing.thumbnail_url;
 		let fileUrl: string | null = existing.file_url;
+		let gamePath: string | null = existing.game_path;
 
 		const thumbnail = formData.get('thumbnail');
 		if (thumbnail instanceof File && thumbnail.size > 0) {
@@ -115,6 +130,16 @@ export const actions: Actions = {
 			fileUrl = null;
 		}
 
+		if (hasGameExport) {
+			try {
+				({ game_path: gamePath } = await uploadGameExport(supabase, gameExport as File, user.id));
+			} catch (e) {
+				return fail(400, { ...values, error: `Game export upload failed: ${(e as Error).message}` });
+			}
+		} else if (formData.get('remove_game_export') === 'on') {
+			gamePath = null;
+		}
+
 		const { error: updateError } = await supabase
 			.from('projects')
 			.update({
@@ -123,11 +148,16 @@ export const actions: Actions = {
 				project_type: values.project_type,
 				link: values.link,
 				thumbnail_url: thumbnailUrl,
-				file_url: fileUrl
+				file_url: fileUrl,
+				game_path: gamePath
 			})
 			.eq('id', params.id);
 
 		if (updateError) {
+			// Roll back a freshly uploaded export if the row couldn't be updated.
+			if (gamePath !== existing.game_path) {
+				await deleteGameExport(supabase, gamePath);
+			}
 			return fail(400, { ...values, error: updateError.message });
 		}
 
@@ -137,6 +167,9 @@ export const actions: Actions = {
 		}
 		if (fileUrl !== existing.file_url) {
 			await deleteFileByUrl(supabase, existing.file_url);
+		}
+		if (gamePath !== existing.game_path) {
+			await deleteGameExport(supabase, existing.game_path);
 		}
 
 		redirect(303, `/projects/${params.id}`);

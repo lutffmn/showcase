@@ -1,10 +1,12 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { untrack } from 'svelte';
 	import type { PageProps } from './$types';
 	import { PROJECT_TYPES } from '#lib/projects.js';
 
 	let { form }: PageProps = $props();
 	let submitting = $state(false);
+	let projectType = $state(untrack(() => form?.project_type ?? 'scratch'));
 </script>
 
 <svelte:head>
@@ -51,7 +53,7 @@
 
 		<div class="field">
 			<label for="project_type">Project type</label>
-			<select id="project_type" name="project_type" required value={form?.project_type ?? 'scratch'}>
+			<select id="project_type" name="project_type" required bind:value={projectType}>
 				{#each PROJECT_TYPES as type}
 					<option value={type.value}>{type.label}</option>
 				{/each}
@@ -65,11 +67,29 @@
 				name="link"
 				type="url"
 				placeholder="https://scratch.mit.edu/projects/123456/"
-				required
+				required={projectType !== 'construct3'}
 				value={form?.link ?? ''}
 			/>
-			<span class="hint">Where the project is played or hosted.</span>
+			<span class="hint">
+				{projectType === 'construct3'
+					? 'Where the project is hosted. Optional if you upload an export below.'
+					: 'Where the project is played or hosted.'}
+			</span>
 		</div>
+
+		{#if projectType === 'construct3'}
+			<div class="field">
+				<label for="game_export">
+					Game export <span class="muted">— .zip, optional</span>
+				</label>
+				<input id="game_export" name="game_export" type="file" accept=".zip,application/zip" />
+				<span class="hint">
+					In Construct 3: <strong>Menu → Export → Web (HTML5)</strong>. Zip the contents of the
+					exported folder (you should see <code>index.html</code> at the top level) and upload it here
+					— we'll host it so the game plays right on this page.
+				</span>
+			</div>
+		{/if}
 
 		<div class="two-up">
 			<div class="field">
@@ -85,7 +105,8 @@
 
 		<div class="submit-row">
 			<a class="btn btn-ghost" href="/">Cancel</a>
-			<button class="btn" type="submit" disabled={submitting}>
+			<button class="btn" type="submit" disabled={submitting} aria-busy={submitting}>
+				{#if submitting}<span class="spinner" aria-hidden="true"></span>{/if}
 				{submitting ? 'Creating…' : 'Create project'}
 			</button>
 		</div>
@@ -96,6 +117,10 @@
 	.form-page {
 		max-width: 620px;
 		margin: 2.25rem auto 0;
+	}
+
+	.form-page > .card {
+		box-shadow: var(--shadow-md);
 	}
 
 	.form-head {

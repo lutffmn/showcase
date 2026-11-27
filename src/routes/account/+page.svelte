@@ -108,7 +108,8 @@
 				<input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required value={email} />
 			</div>
 
-			<button class="btn" type="submit" disabled={savingProfile}>
+			<button class="btn" type="submit" disabled={savingProfile} aria-busy={savingProfile}>
+				{#if savingProfile}<span class="spinner" aria-hidden="true"></span>{/if}
 				{savingProfile ? 'Saving…' : 'Save profile'}
 			</button>
 		</form>
@@ -167,7 +168,8 @@
 				toggle: () => (showConfirm = !showConfirm)
 			})}
 
-			<button class="btn" type="submit" disabled={savingPassword}>
+			<button class="btn" type="submit" disabled={savingPassword} aria-busy={savingPassword}>
+				{#if savingPassword}<span class="spinner" aria-hidden="true"></span>{/if}
 				{savingPassword ? 'Updating…' : 'Update password'}
 			</button>
 		</form>
@@ -180,8 +182,21 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 		gap: 1.25rem;
 		align-items: start;
-		max-width: 880px;
+		max-width: 900px;
 		margin-bottom: 3rem;
+	}
+
+	.settings > .card {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.settings > .card::before {
+		content: '';
+		position: absolute;
+		inset: 0 0 auto 0;
+		height: 3px;
+		background: var(--gradient-soft);
 	}
 
 	@media (max-width: 720px) {

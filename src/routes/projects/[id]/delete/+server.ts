@@ -1,7 +1,7 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { isUuid } from '#lib/projects.js';
-import { deleteFileByUrl } from '#lib/server/projects.js';
+import { deleteFileByUrl, deleteGameExport } from '#lib/server/projects.js';
 
 /** Deletes a project (and its stored assets). Owner-only. */
 export const POST: RequestHandler = async ({ params, locals: { supabase, safeGetSession } }) => {
@@ -17,7 +17,7 @@ export const POST: RequestHandler = async ({ params, locals: { supabase, safeGet
 
 	const { data: existing, error: fetchError } = await supabase
 		.from('projects')
-		.select('created_by, thumbnail_url, file_url')
+		.select('created_by, thumbnail_url, file_url, game_path')
 		.eq('id', params.id)
 		.maybeSingle();
 
@@ -41,6 +41,7 @@ export const POST: RequestHandler = async ({ params, locals: { supabase, safeGet
 
 	await deleteFileByUrl(supabase, existing.thumbnail_url);
 	await deleteFileByUrl(supabase, existing.file_url);
+	await deleteGameExport(supabase, existing.game_path);
 
 	redirect(303, '/dashboard');
 };

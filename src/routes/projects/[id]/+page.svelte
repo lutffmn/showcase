@@ -1,11 +1,12 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-	import { projectTypeLabel, resolveEmbedUrl } from '#lib/projects.js';
+	import { projectTypeLabel, resolvePlayUrl, isHostedGame } from '#lib/projects.js';
 
 	let { data }: PageProps = $props();
 
 	const project = $derived(data.project);
-	const embedUrl = $derived(resolveEmbedUrl(project.project_type, project.link));
+	const playUrl = $derived(resolvePlayUrl(project));
+	const hosted = $derived(isHostedGame(project));
 	const isOwner = $derived(Boolean(data.user && data.user.id === project.created_by));
 
 	const addedOn = $derived(
@@ -39,6 +40,9 @@
 
 		<div class="meta">
 			<span class="badge">{projectTypeLabel(project.project_type)}</span>
+			{#if hosted}
+				<span class="badge badge-neutral">Hosted</span>
+			{/if}
 			<span class="muted date">Added {addedOn}</span>
 		</div>
 
@@ -49,9 +53,16 @@
 		{/if}
 
 		<div class="actions">
-			<a class="btn btn-secondary" href={project.link} target="_blank" rel="noopener noreferrer">
-				Open original ↗
-			</a>
+			{#if hosted}
+				<a class="btn btn-secondary" href={playUrl} target="_blank" rel="noopener noreferrer">
+					Open full screen ↗
+				</a>
+			{/if}
+			{#if project.link}
+				<a class="btn btn-secondary" href={project.link} target="_blank" rel="noopener noreferrer">
+					Open original ↗
+				</a>
+			{/if}
 			{#if project.file_url}
 				<a
 					class="btn btn-secondary"
@@ -78,7 +89,7 @@
 		</header>
 		<div class="player">
 			<iframe
-				src={embedUrl}
+				src={playUrl}
 				title={project.name}
 				allow="fullscreen; autoplay; gamepad; clipboard-write"
 				allowfullscreen
@@ -181,6 +192,7 @@
 
 	.stage {
 		overflow: hidden;
+		box-shadow: var(--shadow-md);
 	}
 
 	.stage-bar {

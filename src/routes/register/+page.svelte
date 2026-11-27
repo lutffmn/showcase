@@ -54,7 +54,8 @@
 				/>
 			</div>
 
-			<button class="btn btn-block" type="submit" disabled={submitting}>
+			<button class="btn btn-block" type="submit" disabled={submitting} aria-busy={submitting}>
+				{#if submitting}<span class="spinner" aria-hidden="true"></span>{/if}
 				{submitting ? 'Creating account…' : 'Create account'}
 			</button>
 		</form>
@@ -67,8 +68,22 @@
 
 <style>
 	.auth {
-		max-width: 420px;
-		margin: 3rem auto 0;
+		max-width: 440px;
+		margin: 3.5rem auto 0;
+	}
+
+	.auth .card {
+		position: relative;
+		overflow: hidden;
+		box-shadow: var(--shadow-lg);
+	}
+
+	.auth .card::before {
+		content: '';
+		position: absolute;
+		inset: 0 0 auto 0;
+		height: 4px;
+		background: var(--gradient);
 	}
 
 	.head {
