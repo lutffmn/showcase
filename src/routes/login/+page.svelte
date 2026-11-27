@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Log in · td-shows</title>
+	<title>Log in · Showcase</title>
 </svelte:head>
 
 <div class="auth">

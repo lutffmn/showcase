@@ -16,7 +16,7 @@
 </script>
 
 <svelte:head>
-	<title>Account · td-shows</title>
+	<title>Account · Showcase</title>
 </svelte:head>
 
 {#snippet pwField(opts: {

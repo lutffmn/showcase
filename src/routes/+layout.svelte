@@ -33,7 +33,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<title>td-shows</title>
+	<title>Showcase</title>
 </svelte:head>
 
 <header class="site-header">
@@ -44,7 +44,7 @@
 					<path d="M8 5.5v13l11-6.5-11-6.5z" fill="currentColor" />
 				</svg>
 			</span>
-			<span class="brand-name">td-shows</span>
+			<span class="brand-name">Showcase</span>
 		</a>
 
 		<nav class="site-nav">
@@ -87,7 +87,7 @@
 		background: color-mix(in srgb, var(--bg) 74%, transparent);
 		backdrop-filter: blur(16px) saturate(160%);
 		-webkit-backdrop-filter: blur(16px) saturate(160%);
-		border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+		border-bottom: 2px solid var(--primary-soft);
 		view-transition-name: site-header;
 	}
 
@@ -103,14 +103,16 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 0.6rem;
-		font-weight: 750;
+		font-weight: 800;
+		font-family: var(--font-display);
 		letter-spacing: -0.02em;
-		color: var(--text);
+		color: var(--navy);
 		text-decoration: none;
+		transition: color 0.18s ease;
 	}
 
 	.brand:hover {
-		color: var(--text);
+		color: var(--navy);
 		text-decoration: none;
 	}
 
@@ -123,12 +125,10 @@
 		place-items: center;
 		width: 32px;
 		height: 32px;
-		border-radius: 10px;
+		border-radius: 11px;
 		background: var(--gradient);
-		color: #fff;
-		box-shadow:
-			var(--shadow-sm),
-			0 8px 20px -8px color-mix(in srgb, var(--primary) 75%, transparent);
+		color: var(--navy-deep);
+		border: 1px solid rgba(255, 255, 255, 0.6);
 		transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 	}
 
@@ -144,10 +144,11 @@
 	}
 
 	.nav-link {
-		padding: 0.5rem 0.8rem;
+		position: relative;
+		padding: 0.5rem 0.85rem;
 		border-radius: var(--radius-full);
 		color: var(--text-muted);
-		font-weight: 600;
+		font-weight: 700;
 		font-size: 0.92rem;
 		text-decoration: none;
 		transition:
@@ -155,15 +156,35 @@
 			color 0.18s ease;
 	}
 
+	/* Animated lime underline, like the Academy navigation. */
+	.nav-link::after {
+		content: '';
+		position: absolute;
+		left: 0.85rem;
+		right: 0.85rem;
+		bottom: 0.26rem;
+		height: 2px;
+		border-radius: 2px;
+		background: var(--primary-deep);
+		transform: scaleX(0);
+		transform-origin: center;
+		transition: transform 0.22s cubic-bezier(0.7, 0, 0.2, 1);
+	}
+
 	.nav-link:hover {
-		background: var(--surface-2);
-		color: var(--text);
+		background: var(--primary-soft);
+		color: var(--navy);
 		text-decoration: none;
 	}
 
+	.nav-link:hover::after,
+	.nav-link:focus-visible::after,
+	.nav-link.active::after {
+		transform: scaleX(1);
+	}
+
 	.nav-link.active {
-		color: var(--primary);
-		background: var(--primary-soft);
+		color: var(--navy-deep);
 	}
 
 	.nav-cta {

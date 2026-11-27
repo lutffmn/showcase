@@ -19,7 +19,7 @@
 </script>
 
 <svelte:head>
-	<title>{project.name} · td-shows</title>
+	<title>{project.name} · Showcase</title>
 </svelte:head>
 
 <nav class="breadcrumb">
@@ -106,6 +106,7 @@
 
 	.breadcrumb a {
 		color: var(--text-muted);
+		transition: color 0.18s ease;
 	}
 
 	.breadcrumb a:hover {
@@ -152,6 +153,11 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.cover:hover img {
+		transform: scale(1.06);
 	}
 
 	.cover .initial {
@@ -193,6 +199,11 @@
 	.stage {
 		overflow: hidden;
 		box-shadow: var(--shadow-md);
+		transition: box-shadow 0.25s ease;
+	}
+
+	.stage:hover {
+		box-shadow: var(--shadow-lg);
 	}
 
 	.stage-bar {

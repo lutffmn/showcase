@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-	<title>New project · td-shows</title>
+	<title>New project · Showcase</title>
 </svelte:head>
 
 <div class="form-page">

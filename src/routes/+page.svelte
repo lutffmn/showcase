@@ -8,11 +8,11 @@
 </script>
 
 <svelte:head>
-	<title>td-shows · Projects</title>
+	<title>Showcase · Projects</title>
 </svelte:head>
 
 <section class="hero">
-	<span class="eyebrow">Showcase</span>
+	<span class="eyebrow">Create · Play · Share</span>
 	<h1 class="hero-title">
 		Play <span class="grad">handmade games</span> &amp; playful projects
 	</h1>

@@ -12,7 +12,7 @@
 </script>
 
 <svelte:head>
-	<title>My projects · td-shows</title>
+	<title>My projects · Showcase</title>
 </svelte:head>
 
 <div class="page-head">
@@ -120,6 +120,11 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+	}
+
+	.manage-row:hover .thumb img {
+		transform: scale(1.07);
 	}
 
 	.thumb .initial {
@@ -142,6 +147,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		transition: color 0.18s ease;
 	}
 
 	.name:hover {

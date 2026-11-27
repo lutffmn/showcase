@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-	<title>Edit {project.name} · td-shows</title>
+	<title>Edit {project.name} · Showcase</title>
 </svelte:head>
 
 <div class="form-page">
@@ -184,6 +184,7 @@
 
 	.breadcrumb a {
 		color: var(--text-muted);
+		transition: color 0.18s ease;
 	}
 
 	.breadcrumb a:hover {
@@ -235,6 +236,12 @@
 		object-fit: cover;
 		border-radius: var(--radius-sm);
 		border: 1px solid var(--border);
+		transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s ease;
+	}
+
+	.current img:hover {
+		transform: scale(1.05);
+		border-color: var(--primary-deep);
 	}
 
 	.submit-row {
