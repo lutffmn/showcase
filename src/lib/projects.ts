@@ -1,3 +1,5 @@
+import { resolve } from '$app/paths';
+
 export type ProjectType = 'scratch' | 'construct3';
 
 export interface Project {
@@ -63,7 +65,7 @@ export function resolvePlayUrl(
 	project: Pick<Project, 'id' | 'project_type' | 'link' | 'game_path'>
 ): string {
 	if (project.project_type === 'construct3' && project.game_path) {
-		return `/projects/${project.id}/play/${GAME_INDEX_FILE}`;
+		return resolve('/projects/[id]/play/[...path]', { id: project.id, path: GAME_INDEX_FILE });
 	}
 	return resolveEmbedUrl(project.project_type, project.link);
 }
